@@ -2,7 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 import ProductCard from '../components/ProductCard.astro';
 import { ProductCatalog } from '../models/ProductCatalog';
-import productsData from '../data/products.json';
+import * as productsData from '../data/products.json
 
 const catalog = new ProductCatalog(productsData);
 const allProducts = catalog.getAllProducts();
