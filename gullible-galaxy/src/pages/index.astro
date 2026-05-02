@@ -1,0 +1,198 @@
+---
+import Layout from '../layouts/Layout.astro';
+import ProductCard from '../components/ProductCard.astro';
+import { ProductCatalog } from '../models/ProductCatalog';
+import productsData from '../data/products.json';
+
+const catalog = new ProductCatalog(productsData);
+const allProducts = catalog.getAllProducts();
+---
+
+<Layout title="Jamie & Co. | Fine Jewelry">
+  <section class="hero">
+    <p class="subtitle">Find your perfect piece of elegance</p>
+    
+    <div class="controls-wrapper">
+      <div class="filter-container">
+        <div class="filter-group">
+          <button class="filter-btn active" data-category="all">All</button>
+          <button class="filter-btn" data-category="rings">Rings</button>
+          <button class="filter-btn" data-category="necklaces">Necklaces</button>
+          <button class="filter-btn" data-category="bracelets">Bracelets</button>
+        </div>
+      </div>
+
+      <div class="sort-container">
+        <select id="price-sort" class="sort-select">
+          <option value="default">Default Sort</option>
+          <option value="low">Price: Low to High</option>
+          <option value="high">Price: High to Low</option>
+        </select>
+      </div>
+    </div>
+  </section>
+  
+  <div id="product-list" class="product-grid">
+    {allProducts.map((product, index) => (
+      <div class="card-wrapper" 
+           data-index={index}
+           data-category={product.category.toLowerCase()} 
+           data-price={product.price.toString().replace(/[^0-9.]/g, '')}>
+        <ProductCard product={product} />
+      </div>
+    ))}
+  </div>
+</Layout>
+
+<script>
+  function initStore() {
+    const buttons = document.querySelectorAll('.filter-btn');
+    const cards = document.querySelectorAll('.card-wrapper');
+    const sortSelect = document.getElementById('price-sort') as HTMLSelectElement;
+    const productGrid = document.getElementById('product-list');
+
+    if (!buttons.length || !sortSelect || !productGrid) return;
+
+    function updateDisplay() {
+      const activeBtn = document.querySelector('.filter-btn.active');
+      const category = activeBtn?.getAttribute('data-category');
+      const sortValue = sortSelect.value;
+
+      let cardArray = Array.from(cards) as HTMLElement[];
+
+      cardArray.forEach(card => {
+        const cardCategory = card.getAttribute('data-category');
+        card.style.display = (category === 'all' || cardCategory === category) ? 'block' : 'none';
+      });
+
+      cardArray.sort((a, b) => {
+        if (sortValue === 'default') {
+          return parseInt(a.getAttribute('data-index') || '0') - parseInt(b.getAttribute('data-index') || '0');
+        }
+        const priceA = parseFloat(a.getAttribute('data-price') || '0');
+        const priceB = parseFloat(b.getAttribute('data-price') || '0');
+        return sortValue === 'low' ? priceA - priceB : priceB - priceA;
+      });
+      
+      cardArray.forEach(card => {
+        if (productGrid) {
+          productGrid.appendChild(card);
+        }
+      });
+    }
+
+    buttons.forEach(button => {
+      button.addEventListener('click', () => {
+        buttons.forEach(btn => btn.classList.remove('active'));
+        button.classList.add('active');
+        updateDisplay();
+      });
+    });
+
+    sortSelect.addEventListener('change', updateDisplay);
+  }
+
+  initStore();
+  document.addEventListener('astro:after-swap', initStore);
+</script>
+
+<style>
+  .hero {
+    padding: 2.5rem 1rem 0.5rem;
+    background: #ffffff;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .subtitle {
+    text-align: center;
+    color: #888;
+    font-size: 1.1rem;
+    margin-bottom: 1.8rem;
+  }
+
+  .controls-wrapper {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.8rem;
+  }
+
+  .filter-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+
+  .filter-group {
+    display: flex;
+    gap: 0.6rem;
+  }
+
+  .filter-btn {
+    padding: 0.4rem 1.1rem;
+    border: 1px solid #eee;
+    background: white;
+    color: #666;
+    cursor: pointer;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+  }
+
+  .filter-btn.active {
+    background: #add8e6;
+    color: white;
+    border-color: #add8e6;
+    font-weight: 600;
+  }
+
+  .sort-container {
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+    padding-right: 2rem;
+    margin-bottom: -0.8rem;
+    z-index: 10;
+  }
+
+  .sort-select {
+    padding: 0.4rem 2rem 0.4rem 0.8rem;
+    border-radius: 8px;
+    border: 1px solid #eee;
+    background: #fafafa;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #444;
+    cursor: pointer;
+    outline: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.7rem center;
+  }
+
+  .product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 2rem;
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  @media (max-width: 768px) {
+    .sort-container {
+      justify-content: center;
+      padding-right: 0;
+      margin-bottom: 0;
+    }
+    .product-grid {
+      grid-template-columns: 1fr;
+      padding: 1rem;
+    }
+  }
+</style>

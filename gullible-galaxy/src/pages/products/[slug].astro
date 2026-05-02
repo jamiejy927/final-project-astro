@@ -1,0 +1,208 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { ProductCatalog } from '../../models/ProductCatalog';
+import productsData from '../../data/products.json';
+
+export async function getStaticPaths() {
+  const catalog = new ProductCatalog(productsData);
+  const products = catalog.getAllProducts();
+  
+  return products.map((product) => ({
+    params: { slug: product.slug },
+    props: { product },
+  }));
+}
+
+const { product } = Astro.props;
+---
+
+<Layout title={`${product.title} | Jamie & Co.`}>
+  <nav class="back-nav">
+    <div class="container">
+      <a href="/" class="back-link">
+        <span class="arrow">←</span> Back to Collection
+      </a>
+    </div>
+  </nav>
+
+  <main class="container">
+    <div class="product-detail">
+      <div class="image-box">
+        <img src={product.image} alt={product.title} />
+      </div>
+      
+      <div class="info-box">
+        <p class="category">{product.category}</p>
+        <h1>{product.title}</h1>
+        <p class="price">{product.getFormattedPrice()}</p>
+        
+        <div class="description">
+          <h3>Description</h3>
+          <p>{product.description}</p>
+        </div>
+
+        <p class={`status ${product.inStock ? 'in' : 'out'}`}>
+          {product.getStockStatus()}
+        </p>
+        
+        <button class="add-btn" disabled={!product.inStock}>Add to Cart</button>
+      </div>
+    </div>
+  </main>
+</Layout>
+
+<script>
+  const addButton = document.querySelector('.add-btn');
+  
+  if (addButton) {
+    addButton.addEventListener('click', () => {
+      const productTitle = document.querySelector('h1')?.textContent;
+      const productPrice = document.querySelector('.price')?.textContent;
+
+      const cartItem = {
+        title: productTitle,
+        price: productPrice,
+        addedAt: new Date().toISOString()
+      };
+
+      const currentCart = JSON.parse(localStorage.getItem('shopping_cart') || '[]');
+      currentCart.push(cartItem);
+      localStorage.setItem('shopping_cart', JSON.stringify(currentCart));
+
+      alert(`${productTitle} has been added to your cart!`);
+      window.location.reload(); 
+    });
+  }
+</script>
+
+<style>
+  .container { 
+    max-width: 1200px; 
+    margin: 0 auto; 
+    padding: 0 2rem; 
+  }
+
+  .back-nav {
+    padding: 2rem 0;
+  }
+
+  .back-link {
+    text-decoration: none;
+    color: #888;
+    font-size: 0.95rem;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: color 0.2s ease;
+  }
+
+  .back-link:hover {
+    color: #add8e6;
+  }
+
+  .arrow {
+    font-size: 1.2rem;
+    transition: transform 0.2s ease;
+  }
+
+  .back-link:hover .arrow {
+    transform: translateX(-4px);
+  }
+  
+  .product-detail { 
+    display: grid; 
+    grid-template-columns: 1fr 1fr; 
+    gap: 4rem; 
+    align-items: start;
+    padding-bottom: 5rem;
+  }
+
+  .image-box {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    background: #f9f9f9;
+  }
+
+  .image-box img { 
+    width: 100%; 
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  
+  .category { 
+    text-transform: uppercase; 
+    color: #aaa; 
+    letter-spacing: 2px; 
+    font-size: 0.85rem;
+    margin-bottom: 1rem;
+  }
+
+  h1 {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: #333;
+    margin: 0 0 1.5rem 0;
+    letter-spacing: -1px;
+  }
+
+  .price { 
+    font-size: 1.8rem; 
+    font-weight: 600; 
+    color: #333;
+    margin-bottom: 2.5rem; 
+  }
+
+  .description h3 {
+    font-size: 1.1rem;
+    color: #333;
+    margin-bottom: 0.8rem;
+  }
+
+  .description p {
+    color: #666;
+    line-height: 1.8;
+    margin-bottom: 2rem;
+  }
+
+  .status { 
+    font-weight: 600; 
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem; 
+  }
+  .status.in { color: #2ecc71; }
+  .status.out { color: #e74c3c; }
+  
+  .add-btn { 
+    padding: 1.2rem; 
+    background: #333; 
+    color: white; 
+    border: none; 
+    border-radius: 8px; 
+    cursor: pointer; 
+    width: 100%; 
+    font-size: 1rem;
+    font-weight: 600;
+    transition: opacity 0.2s;
+  }
+
+  .add-btn:hover:not(:disabled) { 
+    opacity: 0.8; 
+  }
+
+  .add-btn:disabled { 
+    background: #ccc; 
+    cursor: not-allowed; 
+  }
+
+  @media (max-width: 768px) {
+    .product-detail {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+  }
+</style>

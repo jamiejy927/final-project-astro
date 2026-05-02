@@ -1,0 +1,162 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Your Cart | Jamie & Co.">
+  <div class="cart-container">
+    <header class="cart-header">
+      <h1>Your Shopping Cart</h1>
+      <p class="subtitle">Review your selected pieces of elegance</p>
+    </header>
+
+    <div id="cart-list" class="cart-list">
+      <div class="empty-state">Your cart is currently empty.</div>
+    </div>
+
+    <div class="cart-summary">
+      <button id="clear-cart">Clear Cart</button>
+      <button class="checkout-btn">Proceed to Checkout</button>
+    </div>
+  </div>
+</Layout>
+
+<script>
+  const cartList = document.getElementById('cart-list');
+  const clearBtn = document.getElementById('clear-cart');
+  const savedCart = JSON.parse(localStorage.getItem('shopping_cart') || '[]');
+
+  if (cartList && savedCart.length > 0) {
+    cartList.innerHTML = savedCart.map((item: any) => {
+      let title = item.title || "";
+      let price = item.price || "";
+
+      if (title.includes('$') && !price) {
+        const parts = title.split('$');
+        title = parts[0].trim();
+        price = '$' + parts[1].trim();
+      }
+
+      return `
+        <div class="cart-item-row">
+          <span class="item-title">${title}</span>
+          <span class="item-price">${price}</span>
+        </div>
+      `;
+    }).join('');
+  }
+
+  clearBtn?.addEventListener('click', () => {
+    if (confirm('Are you sure you want to clear your cart?')) {
+      localStorage.removeItem('shopping_cart');
+      window.location.reload();
+    }
+  });
+</script>
+
+<style>
+  .cart-container { 
+    max-width: 800px; 
+    margin: 0 auto; 
+    padding: 4rem 2rem; 
+  }
+
+  .cart-header {
+    text-align: center;
+    margin-bottom: 4rem;
+  }
+
+  .cart-header h1 {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: #333;
+    margin-bottom: 0.5rem;
+    letter-spacing: -1px;
+  }
+
+  .subtitle {
+    color: #888;
+    font-size: 1.1rem;
+  }
+
+  .cart-list {
+    border-top: 1px solid #eee;
+    margin-bottom: 3rem;
+  }
+
+  .cart-item-row { 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center;
+    padding: 2rem 0; 
+    border-bottom: 1px solid #eee; 
+  }
+
+  .item-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #333;
+  }
+
+  .item-price {
+    color: #5a80a0;
+    font-weight: 600;
+    font-size: 1.1rem;
+  }
+
+  .empty-state {
+    padding: 5rem 0;
+    text-align: center;
+    color: #aaa;
+    font-size: 1.1rem;
+  }
+
+  .cart-summary { 
+    display: flex; 
+    gap: 1.5rem; 
+    align-items: center;
+  }
+
+  .checkout-btn { 
+    flex: 2; 
+    background: #333; 
+    color: white; 
+    border: none; 
+    padding: 1.2rem; 
+    cursor: pointer; 
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: opacity 0.2s ease;
+  }
+
+  .checkout-btn:hover {
+    opacity: 0.85;
+  }
+
+  #clear-cart { 
+    flex: 1; 
+    cursor: pointer; 
+    border: 1px solid #ddd; 
+    background: white; 
+    padding: 1.2rem;
+    border-radius: 8px;
+    color: #888;
+    font-weight: 600;
+    transition: all 0.2s ease;
+  }
+
+  #clear-cart:hover {
+    background: #f9f9f9;
+    color: #333;
+    border-color: #ccc;
+  }
+
+  @media (max-width: 600px) {
+    .cart-summary {
+      flex-direction: column-reverse;
+    }
+    .checkout-btn, #clear-cart {
+      width: 100%;
+    }
+  }
+</style>

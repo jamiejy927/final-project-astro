@@ -1,0 +1,141 @@
+---
+interface Props {
+  title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{title}</title>
+  </head>
+  <body>
+    <header>
+      <nav class="nav-container">
+        <a href="/" class="logo"><span class="sparkle">✨</span> Jamie & Co.</a>
+        <div class="nav-links">
+          <a href="/">Collection</a>
+          <a href="/cart" class="cart-btn">Cart (0)</a>
+        </div>
+      </nav>
+    </header>
+
+    <main>
+      <slot />
+    </main>
+
+    <footer>
+      <p>&copy; 2026 Jamie & Co. All rights reserved.</p>
+    </footer>
+
+    <style is:global>
+      :root {
+        --primary: #333;
+        --accent: #add8e6;
+      }
+      body {
+        margin: 0;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        line-height: 1.6;
+        background: #ffffff;
+      }
+      .nav-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1.5rem 2rem;
+        background: white;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+      .logo {
+        font-size: 1.5rem;
+        font-weight: 800;
+        text-decoration: none;
+        color: var(--primary);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        letter-spacing: -0.5px;
+        min-width: max-content;
+      }
+      .sparkle {
+        color: #add8e6;
+      }
+      .nav-links {
+        display: flex;
+        align-items: center;
+      }
+      .nav-links a {
+        margin-left: 1.5rem;
+        text-decoration: none;
+        color: var(--primary);
+        font-weight: 500;
+        white-space: nowrap;
+      }
+      .cart-btn {
+        background: var(--primary);
+        color: white !important;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        transition: opacity 0.2s;
+      }
+      .cart-btn:hover {
+        opacity: 0.8;
+      }
+
+      @media (max-width: 480px) {
+        .nav-container {
+          padding: 1rem;
+          justify-content: center;
+        }
+        .logo {
+          font-size: 1.2rem;
+        }
+        .nav-links {
+          width: 100%;
+          justify-content: center;
+          margin-top: 0.5rem;
+        }
+        .nav-links a {
+          margin: 0 0.7rem;
+          font-size: 0.9rem;
+        }
+      }
+
+      main {
+        min-height: 80vh;
+      }
+      footer {
+        text-align: center;
+        padding: 3rem;
+        background: #fcfcfc;
+        margin-top: 4rem;
+        border-top: 1px solid #eee;
+      }
+    </style>
+  </body>
+</html>
+
+<script>
+  const updateCartCounter = () => {
+    const cartBtn = document.querySelector('.cart-btn');
+    const savedCart = JSON.parse(localStorage.getItem('shopping_cart') || '[]');
+    
+    if (cartBtn) {
+      cartBtn.textContent = `Cart (${savedCart.length})`;
+    }
+  };
+
+  updateCartCounter();
+  document.addEventListener('astro:after-swap', updateCartCounter);
+</script>

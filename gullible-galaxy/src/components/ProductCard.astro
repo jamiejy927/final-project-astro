@@ -1,0 +1,87 @@
+---
+import { Product } from '../models/Product';
+
+interface Props {
+  product: Product;
+}
+
+const { product } = Astro.props;
+---
+
+<div class="product-card">
+  <div class="image-container">
+    <img src={product.image} alt={product.title} />
+  </div>
+  
+  <h3>{product.title}</h3>
+  <p class="category">{product.category}</p>
+  <p class="price">{product.getFormattedPrice()}</p>
+  <p class={`status ${product.isInStock() ? 'in-stock' : 'out-of-stock'}`}>
+    {product.isInStock() ? 'In Stock' : 'Out of Stock'}
+  </p>
+  <a href={`/products/${product.slug}`}>View Details</a>
+</div>
+
+<style>
+  .product-card {
+    border: 1px solid #ccc;
+    padding: 0.75rem;
+    border-radius: 8px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
+  .image-container {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    border-radius: 4px;
+    margin-bottom: 0.5rem;
+    background-color: #f9f9f9;
+  }
+
+  .image-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  h3 {
+    font-size: 1.05rem;
+    margin: 0;
+    line-height: 1.2;
+  }
+
+  .category {
+    color: #666;
+    font-size: 0.8rem;
+    margin: 0.1rem 0;
+  }
+
+  .price {
+    font-weight: bold;
+    font-size: 1.1rem;
+    margin: 0.1rem 0;
+  }
+
+  .status {
+    font-size: 0.8rem;
+    margin: 0;
+  }
+
+  .in-stock { color: green; }
+  .out-of-stock { color: red; }
+  
+  a {
+    display: inline-block;
+    margin-top: auto;
+    padding-top: 0.5rem;
+    text-decoration: none;
+    color: #333;
+    font-weight: bold;
+    font-size: 0.85rem;
+  }
+</style>
